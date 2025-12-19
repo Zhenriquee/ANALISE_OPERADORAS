@@ -39,20 +39,35 @@ def render_panorama_mercado(df_mestre):
             tab_score, tab_share, tab_evolucao, tab_spread = st.tabs(["Score", "Share", "Evolução", "Spread"])
             
             with tab_score:
-                st.markdown("""
-                **Power Score (0-100)**
-                $$Score = (0.4 \\times Vidas) + (0.4 \\times Receita) + (0.2 \\times Perf)$$
-                """)
-            
+                    st.markdown("""
+                    **O que é?** Nota de 0 a 100 que define a força da operadora.
+                    **Fórmula:**
+                    $$Score = (0.4 \\times Vidas) + (0.4 \\times Receita) + (0.2 \\times Performance)$$
+                    * **40% Tamanho:** Baseado no número de vidas (normalizado pelo máximo do filtro).
+                    * **40% Financeiro:** Baseado na receita total (normalizado pelo máximo do filtro).
+                    * **20% Performance:** Baseado na média de crescimento trimestral (Vidas + Receita).
+                    """)
+                
             with tab_share:
-                st.markdown("**Market Share (%):** Fatia de mercado que a operadora domina dentro do filtro.")
-            
+                    st.markdown("""
+                    **O que é ?** A fatia de mercado que a operadora domina dentro do filtro selecionado.
+                    **Fórmula :**
+                    $$Share = \\frac{\\text{Valor da Operadora}}{\\text{Soma Total do Mercado (Filtro)}} \\times 100$$
+                    Exemplo: Se a soma de todas as receitas das cooperativas for 1 Milhão e a operadora faturou 
+                                R$ 100 mil, seu Share é 10%.
+                    """)
+                
             with tab_evolucao:
-                st.markdown("""
-                **Evolução (Δ):** Variação % em relação ao trimestre anterior.
-                * **Vol:** Volume de Vidas.
-                * **Fin:** Financeiro (Receita).
-                """)
+                    st.markdown("""
+                    **O que é ?** A variação percentual em relação ao trimestre anterior (Trimestre a Trimestre).
+                    
+                    * **(Vol):** Abreviatura para **Volume de Vidas**. Indica se a carteira de beneficiários cresceu ou diminuiu.
+                    * **(Fin):** Abreviatura para **Financeiro (Receita)**. Indica se o faturamento (Conta 31) cresceu ou diminuiu.
+                    
+                    **Interpretação:**
+                    * <span style='color:green'>Verde (+):</span> Crescimento.
+                    * <span style='color:red'>Vermelho (-):</span> Queda/Retração.
+                    """, unsafe_allow_html=True)
                 
             with tab_spread:
                 st.markdown("""

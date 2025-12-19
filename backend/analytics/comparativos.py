@@ -26,7 +26,7 @@ def obter_trimestres_anteriores(trimestre_atual):
 def calcular_variacoes_operadora(df, id_operadora, trimestre_atual):
     """
     Busca os dados da operadora no trimestre atual, anterior e ano anterior.
-    Retorna um dicionário com os valores e as variações %.
+    Retorna KPI atual, Variação % e VALORES ABSOLUTOS anteriores.
     """
     # Filtra apenas a operadora
     df_op = df[df['ID_OPERADORA'] == str(id_operadora)].set_index('ID_TRIMESTRE')
@@ -45,28 +45,37 @@ def calcular_variacoes_operadora(df, id_operadora, trimestre_atual):
     dados_prev_y = df_op.loc[tri_prev_y] if tri_prev_y in df_op.index else None
 
     kpis = {
-        # Valores Atuais
+        # --- VALORES ATUAIS ---
         'Vidas': atual['NR_BENEF_T'],
         'Receita': atual['VL_SALDO_FINAL'],
         'Ticket': atual['VL_SALDO_FINAL'] / atual['NR_BENEF_T'] if atual['NR_BENEF_T'] > 0 else 0,
         
-        # Variações QoQ (Trimestre Anterior)
-        'Var_Vidas_QoQ': 0,
-        'Var_Receita_QoQ': 0,
+        # --- VALORES ANTERIORES (NOVO) ---
+        'Val_Vidas_QoQ': dados_prev_q['NR_BENEF_T'] if dados_prev_q is not None else 0,
+        'Val_Receita_QoQ': dados_prev_q['VL_SALDO_FINAL'] if dados_prev_q is not None else 0,
         
-        # Variações YoY (Ano Anterior)
-        'Var_Vidas_YoY': 0,
-        'Var_Receita_YoY': 0
+        'Val_Vidas_YoY': dados_prev_y['NR_BENEF_T'] if dados_prev_y is not None else 0,
+        'Val_Receita_YoY': dados_prev_y['VL_SALDO_FINAL'] if dados_prev_y is not None else 0,
+        
+        # --- VARIAÇÕES PERCENTUAIS ---
+        'Var_Vidas_QoQ': 0.0,
+        'Var_Receita_QoQ': 0.0,
+        'Var_Vidas_YoY': 0.0,
+        'Var_Receita_YoY': 0.0,
+        
+        # Referências de Data
+        'Ref_QoQ': tri_prev_q,
+        'Ref_YoY': tri_prev_y
     }
 
-    # Cálculos QoQ
+    # Cálculos QoQ %
     if dados_prev_q is not None:
         if dados_prev_q['NR_BENEF_T'] > 0:
             kpis['Var_Vidas_QoQ'] = (atual['NR_BENEF_T'] - dados_prev_q['NR_BENEF_T']) / dados_prev_q['NR_BENEF_T']
         if dados_prev_q['VL_SALDO_FINAL'] > 0:
             kpis['Var_Receita_QoQ'] = (atual['VL_SALDO_FINAL'] - dados_prev_q['VL_SALDO_FINAL']) / dados_prev_q['VL_SALDO_FINAL']
 
-    # Cálculos YoY
+    # Cálculos YoY %
     if dados_prev_y is not None:
         if dados_prev_y['NR_BENEF_T'] > 0:
             kpis['Var_Vidas_YoY'] = (atual['NR_BENEF_T'] - dados_prev_y['NR_BENEF_T']) / dados_prev_y['NR_BENEF_T']
