@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from infra.db_connector import ConexaoSQLite
 
 class DataEngine:
@@ -10,22 +11,21 @@ class DataEngine:
         print("Carregando tabelas para memória...")
         
         # 1. Dimensão Operadoras
-        # Importante: Trazemos representante e cargo_representante explicitamente
         sql_dim = """
             SELECT 
                 registro_operadora, cnpj, razao_social, uf, modalidade,
-                cidade, representante, cargo_representante
+                cidade, representante, cargo_representante, Data_Registro_ANS
             FROM dim_operadoras
         """
-        df_dim = self.connector.execute_query(sql_dim)
+        df_dim = self.connector.executar_query(sql_dim)
 
         # 2. Beneficiários
         sql_ben = "SELECT CD_OPERADO, ID_TRIMESTRE, NR_BENEF_T FROM beneficiarios_agrupados"
-        df_ben = self.connector.execute_query(sql_ben)
+        df_ben = self.connector.executar_query(sql_ben)
 
         # 3. Financeiro
         sql_fin = "SELECT REG_ANS, ID_TRIMESTRE, VL_SALDO_FINAL FROM demonstracoes_contabeis"
-        df_fin = self.connector.execute_query(sql_fin)
+        df_fin = self.connector.executar_query(sql_fin)
 
         return df_dim, df_ben, df_fin
 
@@ -38,7 +38,6 @@ class DataEngine:
         if df_dim.empty: return pd.DataFrame()
 
         # --- PREPARAÇÃO DE TIPOS ---
-        # Garante que as chaves de join sejam string e sem espaços
         df_dim['registro_operadora'] = df_dim['registro_operadora'].astype(str).str.strip()
         df_ben['CD_OPERADO'] = df_ben['CD_OPERADO'].astype(str).str.strip()
         df_fin['REG_ANS'] = df_fin['REG_ANS'].astype(str).str.strip()
@@ -77,22 +76,32 @@ class DataEngine:
             how='left'
         )
 
-        # Seleção de colunas finais - AQUI ESTAVA O POSSÍVEL ERRO
-        # Precisamos garantir que representante e cargo estejam nesta lista
+        # Seleção de colunas finais (Adicionado Data_Registro_ANS que estava faltando no seu arquivo anterior)
         cols_desejadas = [
             'ID_TRIMESTRE', 'ID_OPERADORA', 'razao_social', 'cnpj', 'uf', 'modalidade',
-            'cidade', 'representante', 'cargo_representante', 
+            'cidade', 'representante', 'cargo_representante', 'Data_Registro_ANS',
             'NR_BENEF_T', 'VL_SALDO_FINAL'
         ]
         
-        # Filtra apenas as que realmente existem no DF (para evitar erro de KeyError)
         cols_existentes = [c for c in cols_desejadas if c in df_final.columns]
         df_final = df_final[cols_existentes]
 
-        # --- KPI CALCULADO ---
-        df_final['CUSTO_POR_VIDA'] = df_final.apply(
-            lambda row: row['VL_SALDO_FINAL'] / row['NR_BENEF_T'] if row['NR_BENEF_T'] > 0 else 0, 
-            axis=1
+        # Ordenação Obrigatória (Necessária para o pct_change funcionar corretamente)
+        df_final = df_final.sort_values(['ID_OPERADORA', 'ID_TRIMESTRE'])
+
+        # --- CÁLCULOS QUE ESTAVAM FALTANDO (CORREÇÃO DO ERRO) ---
+        
+        # 1. Variação de Vidas (Trimestre atual vs Anterior)
+        df_final['VAR_PCT_VIDAS'] = df_final.groupby('ID_OPERADORA')['NR_BENEF_T'].pct_change().fillna(0)
+        
+        # 2. Variação de Receita
+        df_final['VAR_PCT_RECEITA'] = df_final.groupby('ID_OPERADORA')['VL_SALDO_FINAL'].pct_change().fillna(0)
+
+        # KPI Custo (Otimizado com numpy)
+        df_final['CUSTO_POR_VIDA'] = np.where(
+            df_final['NR_BENEF_T'] > 0, 
+            df_final['VL_SALDO_FINAL'] / df_final['NR_BENEF_T'], 
+            0
         )
 
-        return df_final.sort_values(['ID_OPERADORA', 'ID_TRIMESTRE'])
+        return df_final
