@@ -11,24 +11,27 @@ def render_panorama_mercado(df_mestre):
     ultimo_trimestre = df_mestre['ID_TRIMESTRE'].max()
     df_base = df_mestre[df_mestre['ID_TRIMESTRE'] == ultimo_trimestre].copy()
 
-    # --- CONTROLES E FILTROS ---
-    with st.container():
-        col_filtro, col_info = st.columns([1.5, 2])
+    # --- SIDEBAR: CONTROLES E GLOSSÁRIO ---
+    # Tudo dentro deste bloco vai para a barra lateral esquerda
+    with st.sidebar:
+        st.divider()
+        st.header("⚙️ Filtros & Ajuda")
         
-        with col_filtro:
-            opcoes_modalidade = sorted(df_base['modalidade'].dropna().unique())
-            sel_modalidade = st.multiselect(
-                "📌 Filtrar por Modalidade:",
-                options=opcoes_modalidade,
-                placeholder="Selecione (Vazio = Todas)"
-            )
+        # Filtro de Modalidade
+        opcoes_modalidade = sorted(df_base['modalidade'].dropna().unique())
+        sel_modalidade = st.multiselect(
+            "📌 Filtrar por Modalidade:",
+            options=opcoes_modalidade,
+            placeholder="Todas as Modalidades"
+        )
         
-        # --- NOVO GLOSSÁRIO DETALHADO ---
-        with col_info:
-            with st.expander("📚 Glossário: Entenda os Cálculos, Score e Siglas"):
-                tab_score, tab_share, tab_evolucao = st.tabs(["🏆 Power Score", "🍰 Market Share", "📈 Evolução (Vol/Fin)"])
-                
-                with tab_score:
+        st.markdown("---")
+        
+        # Glossário (Agora na lateral para consulta rápida sem poluir a visão)
+        with st.expander("📚 Glossário de Métricas"):
+            tab_score, tab_share, tab_evolucao = st.tabs(["Score", "Share", "Evolução"])
+            
+            with tab_score:
                     st.markdown("""
                     **O que é?** Nota de 0 a 100 que define a força da operadora.
                     **Fórmula:**
@@ -38,16 +41,16 @@ def render_panorama_mercado(df_mestre):
                     * **20% Performance:** Baseado na média de crescimento trimestral (Vidas + Receita).
                     """)
                 
-                with tab_share:
+            with tab_share:
                     st.markdown("""
-                    **O que é?** A fatia de mercado que a operadora domina dentro do filtro selecionado.
+                    **O que é ?** A fatia de mercado que a operadora domina dentro do filtro selecionado.
                     **Fórmula :**
                     $$Share = \\frac{\\text{Valor da Operadora}}{\\text{Soma Total do Mercado (Filtro)}} \\times 100$$
                     Exemplo: Se a soma de todas as receitas das cooperativas for 1 Milhão e a operadora faturou 
                                 R$ 100 mil, seu Share é 10%.
                     """)
                 
-                with tab_evolucao:
+            with tab_evolucao:
                     st.markdown("""
                     **O que é ?** A variação percentual em relação ao trimestre anterior (Trimestre a Trimestre).
                     
@@ -59,7 +62,7 @@ def render_panorama_mercado(df_mestre):
                     * <span style='color:red'>Vermelho (-):</span> Queda/Retração.
                     """, unsafe_allow_html=True)
 
-    # 2. Lógica de Negócio
+    # 2. Lógica de Negócio (Aplica o filtro selecionado na sidebar)
     df_filtrado = filtrar_por_modalidade(df_base, sel_modalidade)
     
     if df_filtrado.empty:
@@ -69,17 +72,19 @@ def render_panorama_mercado(df_mestre):
     df_ranqueado = calcular_power_score(df_filtrado)
     df_ranqueado['Rank'] = df_ranqueado.index + 1
     
-    # Contexto e Totais para cálculo do Share
+    # Contexto e Totais
     texto_contexto = f"Filtro: {', '.join(sel_modalidade)}" if sel_modalidade else "Mercado Total"
     total_vidas = df_filtrado['NR_BENEF_T'].sum()
     total_receita = df_filtrado['VL_SALDO_FINAL'].sum()
 
-    # --- CARD DO LÍDER ---
+    # --- ÁREA PRINCIPAL (MAIN) ---
+    # Agora começa direto aqui, sem controles em cima
+
     top_1 = df_ranqueado.iloc[0]
     
-    st.divider()
     st.caption(f"📅 Referência: **{ultimo_trimestre}** | 🔍 {texto_contexto}")
 
+    # --- CARD DO LÍDER ---
     with st.container():
         c_rank, c_info = st.columns([1, 6])
         with c_rank:
@@ -100,8 +105,6 @@ def render_panorama_mercado(df_mestre):
                   delta=f"{top_1['VAR_PCT_VIDAS']*100:.2f}% (Vol)",
                   delta_color="normal",
                   help="Variação de Volume (Vidas) vs Trimestre Anterior")
-        
-        # Cálculo Share Vidas
         share_vidas = (top_1['NR_BENEF_T']/total_vidas)*100
         k1.caption(f"Share Vidas: {share_vidas:.2f}%")
 
@@ -110,15 +113,15 @@ def render_panorama_mercado(df_mestre):
                   delta=f"{top_1['VAR_PCT_RECEITA']*100:.2f}% (Fin)",
                   delta_color="normal",
                   help="Variação Financeira (Receita) vs Trimestre Anterior")
-        
-        # Cálculo Share Receita
         share_receita = (top_1['VL_SALDO_FINAL']/total_receita)*100
         k2.caption(f"Share Receita: {share_receita:.2f}%")
 
+        # Ticket
         ticket = top_1['VL_SALDO_FINAL'] / top_1['NR_BENEF_T'] if top_1['NR_BENEF_T'] > 0 else 0
         k3.metric("📊 Ticket Médio", f"R$ {ticket:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
                   help="Receita Total dividida pelo Total de Vidas")
 
+        # Sede
         k4.metric("📍 Sede", f"{str(top_1.get('cidade','')).title()}/{str(top_1.get('uf',''))}")
 
         # Info Executiva
