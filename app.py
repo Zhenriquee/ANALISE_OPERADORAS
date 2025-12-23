@@ -63,16 +63,16 @@ def page_calculadora():
 # Aqui criamos os títulos bonitos e ícones
 pages = {
     "Visão de Mercado": [
-        st.Page(page_panorama, title="Panorama Geral", icon="🌎"),
+        st.Page(page_panorama, title="Panorama Estratégico ANS", icon="🌎"),
     ],
     "Análise Estratégica": [
-        st.Page(page_analise, title="Raio-X da Operadora", icon="🏥"),
-        st.Page(page_receita, title="Análise Financeira", icon="💰"),
-        st.Page(page_vidas, title="Análise de Carteira", icon="👥"),
+        st.Page(page_analise, title="Diagnóstico 360º", icon="🏥"),
+        st.Page(page_receita, title="Performance Financeira", icon="💰"),
+        st.Page(page_vidas, title="Gestão de Carteira", icon="👥"),
     ],
     "Ferramentas": [
-        st.Page(page_comparativo, title="Batalha de Operadoras", icon="⚔️"),
-        st.Page(page_calculadora, title="Memória de Cálculo", icon="🧮"),
+        st.Page(page_comparativo, title="Benchmarking Competitivo", icon="⚖️"),
+        st.Page(page_calculadora, title="Metodologia e Criterios", icon="📐"),
     ]
 }
 
