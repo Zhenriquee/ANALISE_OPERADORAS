@@ -23,10 +23,7 @@ def main():
     if df_mestre.empty:
         st.error("Erro crítico: A base de dados retornou vazia. Verifique a conexão.")
         st.stop()
-
-    # 2. Renderiza a Visualização de Panorama (Home Page)
-    # O Streamlit detectará automaticamente a pasta 'pages/' e criará o menu lateral
-    # colocando este arquivo (main.py) como o primeiro item do menu.
+        
     render_panorama_mercado(df_mestre)
 
 if __name__ == "__main__":
