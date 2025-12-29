@@ -55,7 +55,8 @@ def calcular_score_financeiro(df_input):
     df = df_input.copy()
     
     # Normalização Logarítmica para Receita (para não distorcer com gigantes)
-    log_receita = np.log1p(df['VL_SALDO_FINAL'])
+    receita_ajustada = df['VL_SALDO_FINAL'].clip(lower=0)
+    log_receita = np.log1p(receita_ajustada)
     min_rec = log_receita.min()
     max_rec = log_receita.max()
     score_vol = ((log_receita - min_rec) / (max_rec - min_rec)).fillna(0) * 100

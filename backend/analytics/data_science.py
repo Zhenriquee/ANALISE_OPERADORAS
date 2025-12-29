@@ -58,8 +58,8 @@ def _preparar_dados_clustering(df_mestre, trimestre):
     df_tri = df_mestre[df_mestre['ID_TRIMESTRE'] == trimestre].copy()
     
     # Features Logarítmicas (para reduzir escala de gigantes)
-    df_tri['Log_Vidas'] = np.log1p(df_tri['NR_BENEF_T'])
-    df_tri['Log_Receita'] = np.log1p(df_tri['VL_SALDO_FINAL'])
+    df_tri['Log_Vidas'] = np.log1p(df_tri['NR_BENEF_T'].clip(lower=0))
+    df_tri['Log_Receita'] = np.log1p(df_tri['VL_SALDO_FINAL'].clip(lower=0))
     
     if 'Ticket_Medio' not in df_tri.columns:
         df_tri['Ticket_Medio'] = df_tri['VL_SALDO_FINAL'] / df_tri['NR_BENEF_T']
