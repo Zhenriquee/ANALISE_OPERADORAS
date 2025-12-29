@@ -61,13 +61,13 @@ class OperatorAnalysisUseCase:
             if df_tri.empty:
                 raise FilterError(f"Sem dados disponíveis para o trimestre {trimestre}.")
 
-            # --- CORREÇÃO DO ERRO 'Marca_Temp' ---
-            # Criamos a coluna aqui antes de qualquer uso
-            df_tri['Marca_Temp'] = df_tri['razao_social'].apply(extrair_marca)
-
             # Tipagem segura
             df_tri['ID_OPERADORA'] = df_tri['ID_OPERADORA'].astype(str)
             id_operadora = str(id_operadora)
+            df_tri['Marca_Temp'] = df_tri.apply(
+                lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                axis=1
+            )
 
             # Busca dados da operadora
             row_op = df_tri[df_tri['ID_OPERADORA'] == id_operadora]
@@ -86,7 +86,10 @@ class OperatorAnalysisUseCase:
                 
                 # Score Grupo
                 # Como df_score vem de df_tri, teoricamente já teria a marca, mas garantimos:
-                df_score['Marca_Temp'] = df_score['razao_social'].apply(extrair_marca)
+                df_score['Marca_Temp'] = df_score.apply(
+                    lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                    axis=1
+                )
                 df_grupo = df_score[df_score['Marca_Temp'] == marca].copy()
                 df_grupo['Rank_Grupo'] = df_grupo['Power_Score'].rank(ascending=False, method='min')
 

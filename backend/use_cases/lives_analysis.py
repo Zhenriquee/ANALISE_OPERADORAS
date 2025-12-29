@@ -64,24 +64,30 @@ class LivesAnalysisUseCase:
                 raise FilterError(f"Sem dados disponíveis para o trimestre {trimestre}.")
 
             # Garante coluna de Marca e Tipagem
-            df_tri['Marca_Temp'] = df_tri['razao_social'].apply(extrair_marca)
+            
             df_tri['ID_OPERADORA'] = df_tri['ID_OPERADORA'].astype(str)
             id_operadora = str(id_operadora)
-
+            # --- CORREÇÃO AQUI: Lambda com ID_OPERADORA ---
+            df_tri['Marca_Temp'] = df_tri.apply(
+                lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                axis=1
+            )
             row_op = df_tri[df_tri['ID_OPERADORA'] == id_operadora]
             if row_op.empty:
                 raise FilterError(f"Operadora ID {id_operadora} não encontrada no trimestre {trimestre}.")
 
             dados_op = row_op.iloc[0]
-            marca = extrair_marca(dados_op['razao_social'])
-
+            marca = extrair_marca(dados_op['razao_social'], dados_op['ID_OPERADORA'])
             # 2. Score de Vidas e Rankings
             try:
                 df_score = calcular_score_vidas(df_tri)
                 df_score['ID_OPERADORA'] = df_score['ID_OPERADORA'].astype(str)
                 df_score['Rank_Geral'] = df_score['Lives_Score'].rank(ascending=False, method='min')
                 
-                df_score['Marca_Temp'] = df_score['razao_social'].apply(extrair_marca)
+                df_score['Marca_Temp'] = df_score.apply(
+                    lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                    axis=1
+                )
                 df_grupo = df_score[df_score['Marca_Temp'] == marca].copy()
                 df_grupo['Rank_Grupo'] = df_grupo['Lives_Score'].rank(ascending=False, method='min')
                 

@@ -7,6 +7,7 @@ from backend.use_cases.operator_analysis import OperatorAnalysisUseCase
 from backend.exceptions import AppError
 from backend.analytics.brand_intelligence import extrair_marca
 
+
 # Imports Componentes Visuais
 from views.components.header import render_header
 from views.components.metrics import render_kpi_row
@@ -43,7 +44,9 @@ def render_analise(df_mestre):
         if sel_mod != "Todas": df_base = df_base[df_base['modalidade'] == sel_mod]
         
         # Grupo/Marca
-        df_base['Marca_Temp'] = df_base['razao_social'].apply(extrair_marca)
+        df_base['Marca_Temp'] = df_base.apply(
+        lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+        axis=1)
         
         opts_grupo = ["Todos"] + sorted(df_base['Marca_Temp'].unique())
         sel_grupo = st.selectbox("2️⃣ Grupo:", opts_grupo)
@@ -131,7 +134,10 @@ def render_analise(df_mestre):
     # Preparação para gráficos (garantindo a coluna marca)
     df_graficos = content['df_full'].copy()
     if 'Marca_Temp' not in df_graficos.columns:
-        df_graficos['Marca_Temp'] = df_graficos['razao_social'].apply(extrair_marca)
+        df_graficos['Marca_Temp'] = df_graficos.apply(
+                    lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                    axis=1
+                )
 
     with t1:
         c1, c2 = st.columns(2)

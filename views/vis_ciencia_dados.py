@@ -50,7 +50,9 @@ def render_ciencia_dados(df_mestre):
     st.markdown("Onde os players estão posicionados? **Eixo X:** Tamanho (Share) | **Eixo Y:** Velocidade (Crescimento).")
     
     df_seg = preparar_dados_segmentacao(df_mestre, sel_trimestre)
-    df_seg['Marca'] = df_seg['razao_social'].apply(extrair_marca)
+    df_seg['Marca'] = df_seg.apply(
+        lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+        axis=1)
     
     # Gráfico de Bolhas
     fig_seg = px.scatter(

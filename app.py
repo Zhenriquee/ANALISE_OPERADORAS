@@ -9,6 +9,7 @@ from views.vis_vidas import render_analise_vidas
 from views.vis_comparativo import render_comparativo
 from views.vis_calculadora import render_calculadora_didatica
 from views.vis_ciencia_dados import render_ciencia_dados
+from views.vis_movimentacao import render_movimentacao_mercado
 
 # Configuração Global da Página
 st.set_page_config(
@@ -52,6 +53,9 @@ def page_calculadora():
 def page_ciencia():
     render_ciencia_dados(df)    
 
+def page_movimentacao():
+    render_movimentacao_mercado(df)
+
 pages = {
     "Visão de Mercado": [
         st.Page(page_panorama, title="Panorama Estratégico ANS", icon="🌎"),
@@ -60,6 +64,7 @@ pages = {
         st.Page(page_analise, title="Diagnóstico 360º", icon="🏥"),
         st.Page(page_receita, title="Performance Financeira", icon="💰"),
         st.Page(page_vidas, title="Gestão de Carteira", icon="👥"),
+        st.Page(page_movimentacao, title="Movimentação de Mercado", icon="🔄"),
     ],
     "Ferramentas": [
         st.Page(page_comparativo, title="Benchmarking Competitivo", icon="⚖️"),

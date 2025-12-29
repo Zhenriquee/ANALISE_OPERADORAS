@@ -14,10 +14,12 @@ class ComparisonAnalysisUseCase:
         if row.empty: return None
         
         data = row.iloc[0]
-        marca = extrair_marca(data['razao_social'])
+        marca = extrair_marca(data['razao_social'], data['ID_OPERADORA'])
         
         # Rank Grupo
-        df_grupo = df_scored[df_scored['razao_social'].apply(extrair_marca) == marca]
+        df_grupo = df_scored[
+            df_scored.apply(lambda x: extrair_marca(x['razao_social'], x['ID_OPERADORA']), axis=1) == marca
+        ]
         try:
             rank_grupo = df_grupo['Power_Score'].rank(ascending=False, method='min')[df_grupo['ID_OPERADORA'] == id_op].iloc[0]
         except:

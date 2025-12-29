@@ -75,7 +75,10 @@ class RevenueAnalysisUseCase:
                 raise FilterError(f"Sem dados disponíveis para o trimestre {trimestre}.")
 
             # Garante coluna de Marca
-            df_tri['Marca_Temp'] = df_tri['razao_social'].apply(extrair_marca)
+            df_tri['Marca_Temp'] = df_tri.apply(
+                lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                axis=1
+            )
             
             # Tipagem segura
             df_tri['ID_OPERADORA'] = df_tri['ID_OPERADORA'].astype(str)
@@ -86,7 +89,7 @@ class RevenueAnalysisUseCase:
                 raise FilterError(f"Operadora ID {id_operadora} não encontrada no trimestre {trimestre}.")
 
             dados_op = row_op.iloc[0]
-            marca = extrair_marca(dados_op['razao_social'])
+            marca = extrair_marca(dados_op['razao_social'], dados_op['ID_OPERADORA'])
 
             # 2. Scores e Rankings Financeiros
             try:
@@ -96,7 +99,10 @@ class RevenueAnalysisUseCase:
                 df_score['ID_OPERADORA'] = df_score['ID_OPERADORA'].astype(str)
                 df_score['Rank_Geral'] = df_score['Revenue_Score'].rank(ascending=False, method='min')
                 
-                df_score['Marca_Temp'] = df_score['razao_social'].apply(extrair_marca)
+                df_score['Marca_Temp'] = df_score.apply(
+                    lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                    axis=1
+                )
                 df_grupo = df_score[df_score['Marca_Temp'] == marca].copy()
                 df_grupo['Rank_Grupo'] = df_grupo['Revenue_Score'].rank(ascending=False, method='min')
                 

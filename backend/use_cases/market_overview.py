@@ -28,8 +28,10 @@ class MarketOverviewUseCase:
             # 3. Tratamento de Marca (Necessário para gráficos e agrupamentos)
             # Verifica se a coluna já existe para evitar reprocessamento desnecessário
             if 'Marca_Temp' not in self.df_mestre.columns:
-                self.df_mestre['Marca_Temp'] = self.df_mestre['razao_social'].apply(extrair_marca)
-
+                df_snapshot['Marca_Temp'] = df_snapshot.apply(
+                lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+                axis=1
+            )
             # 4. Cálculo de Score e Ranking
             try:
                 df_ranqueado = calcular_power_score(df_snapshot)
