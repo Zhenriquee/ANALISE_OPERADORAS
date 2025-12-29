@@ -140,13 +140,13 @@ def render_analise_vidas(df_mestre):
         df_graficos['Marca_Temp'] = df_graficos['razao_social'].apply(extrair_marca)
     
     c1, c2 = st.columns(2)
-    c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Mercado"), use_container_width=True)
-    c2.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Grupo", info['marca']), use_container_width=True)
+    c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Mercado"), width="stretch")
+    c2.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Grupo", info['marca']), width="stretch")
     st.divider()
     
     # Evolução
     st.subheader("3. Evolução Histórica da Carteira")
-    st.plotly_chart(render_evolution_lives_chart(df_graficos, info['id_op']), use_container_width=True)
+    st.plotly_chart(render_evolution_lives_chart(df_graficos, info['id_op']), width="stretch")
     st.divider()
     
     # Tabelas

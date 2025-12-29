@@ -100,7 +100,7 @@ def render_panorama_mercado(df_mestre):
             "Receita", 
             "Mercado Geral"
         )
-        if fig: st.plotly_chart(fig, use_container_width=True)
+        if fig: st.plotly_chart(fig, width="stretch")
         else: st.info("Dados insuficientes para gerar gráfico de receita.")
     
     with tab_vid:
@@ -111,7 +111,7 @@ def render_panorama_mercado(df_mestre):
             "Vidas", 
             "Mercado Geral"
         )
-        if fig: st.plotly_chart(fig, use_container_width=True)
+        if fig: st.plotly_chart(fig, width="stretch")
         else: st.info("Dados insuficientes para gerar gráfico de vidas.")
 
     st.divider()

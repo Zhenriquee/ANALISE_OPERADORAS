@@ -19,7 +19,6 @@ from views.components.sidebar_header import render_sidebar_header
 def render_analise(df_mestre):
     # --- 1. CONTROLLER DA VIEW (Sidebar & Filtros) ---
     with st.sidebar:
-        
         render_sidebar_header()
         
         st.divider()
@@ -136,16 +135,16 @@ def render_analise(df_mestre):
 
     with t1:
         c1, c2 = st.columns(2)
-        c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Receita", "Mercado"), use_container_width=True)
-        c2.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Receita", "Grupo", info['marca']), use_container_width=True)
+        c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Receita", "Mercado"), width="stretch")
+        c2.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Receita", "Grupo", info['marca']), width="stretch")
     with t2:
         c1, c2 = st.columns(2)
-        c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Mercado"), use_container_width=True)
-        c2.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Grupo", info['marca']), use_container_width=True)
+        c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Mercado"), width="stretch")
+        c2.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Vidas", "Grupo", info['marca']), width="stretch")
     st.divider()
     
     st.subheader("3. Evolução Histórica")
-    st.plotly_chart(render_evolution_chart(df_graficos, info['id_op']), use_container_width=True)
+    st.plotly_chart(render_evolution_chart(df_graficos, info['id_op']), width="stretch")
     st.divider()
     
     # Tabelas

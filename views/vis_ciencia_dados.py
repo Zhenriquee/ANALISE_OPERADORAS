@@ -41,7 +41,7 @@ def render_ciencia_dados(df_mestre):
         origin='lower'
     )
     fig_corr.update_layout(height=500)
-    st.plotly_chart(fig_corr, use_container_width=True)
+    st.plotly_chart(fig_corr, width="stretch")
     
     st.divider()
 
@@ -72,7 +72,7 @@ def render_ciencia_dados(df_mestre):
     fig_seg.add_hline(y=media_cresc, line_dash="dot", annotation_text="Média Crescimento", line_color="grey")
     fig_seg.add_vline(x=media_share, line_dash="dot", annotation_text="Média Share", line_color="grey")
     
-    st.plotly_chart(fig_seg, use_container_width=True)
+    st.plotly_chart(fig_seg, width="stretch")
     
     st.divider()
 
@@ -96,7 +96,7 @@ def render_ciencia_dados(df_mestre):
     )
     fig_box.update_layout(yaxis_tickprefix="R$ ")
     
-    st.plotly_chart(fig_box, use_container_width=True)
+    st.plotly_chart(fig_box, width="stretch")
 
     
 
@@ -116,7 +116,7 @@ def render_ciencia_dados(df_mestre):
     with tab_elbow:
         df_elbow = calcular_elbow_method(df_mestre, sel_trimestre)
         fig_elb = px.line(df_elbow, x='K', y='Inertia', markers=True, title="Método do Cotovelo")
-        st.plotly_chart(fig_elb, use_container_width=True)
+        st.plotly_chart(fig_elb, width="stretch")
         
         k_sel = st.slider("Selecione o número de clusters (K):", 2, 8, 4)
 
@@ -152,7 +152,7 @@ def render_ciencia_dados(df_mestre):
         )
         # Aumenta o tamanho base das bolhas para ficarem visíveis
         fig_2d.update_traces(marker=dict(line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
-        st.plotly_chart(fig_2d, use_container_width=True)
+        st.plotly_chart(fig_2d, width="stretch")
 
     # --- ABA 3: Cubo 3D (Apenas Centroides) ---
     with tab_3d:
@@ -183,7 +183,7 @@ def render_ciencia_dados(df_mestre):
                 zaxis_title='Dimensão 3 (Rentabilidade/Mix)'
             )
         )
-        st.plotly_chart(fig_3d, use_container_width=True)
+        st.plotly_chart(fig_3d, width="stretch")
 
     # --- ABA 4: Interpretação (Tabela) ---
     with tab_info:
@@ -198,4 +198,4 @@ def render_ciencia_dados(df_mestre):
         view_summ['Cresc. Vidas'] = view_summ['VAR_PCT_VIDAS'].map('{:+.2%}'.format)
         
         cols = ['Cluster_ID', 'Qtd Ops', 'Vidas (Méd)', 'Receita (Méd)', 'Ticket (Méd)', 'Cresc. Vidas']
-        st.dataframe(view_summ[cols].set_index('Cluster_ID'), use_container_width=True)
+        st.dataframe(view_summ[cols].set_index('Cluster_ID'), width="stretch")

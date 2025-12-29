@@ -189,4 +189,4 @@ def render_comparativo(df_mestre):
         title="Comparativo Relativo (Escala 0-100)",
         margin=dict(t=30, b=30)
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
