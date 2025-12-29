@@ -14,6 +14,8 @@ from views.components.metrics import render_revenue_kpi_row
 from views.components.charts import render_spread_chart
 from views.components.tables import render_ranking_table, formatar_moeda_br
 from views.components.glossary import render_glossary
+from views.components.footer import render_sidebar_footer
+from views.components.sidebar_header import render_sidebar_header
 
 def render_evolution_revenue_chart(df_mestre, id_operadora):
     """
@@ -36,6 +38,8 @@ def render_evolution_revenue_chart(df_mestre, id_operadora):
 def render_analise_receita(df_mestre):
     # --- 1. CONTROLLER (Sidebar) ---
     with st.sidebar:
+        render_sidebar_header()
+        st.divider()
         st.header("⚙️ Filtros Financeiros")
         
         try:
@@ -73,6 +77,7 @@ def render_analise_receita(df_mestre):
         
         st.markdown("---")
         render_glossary()
+        render_sidebar_footer()
 
     # --- 2. EXECUÇÃO DO CASO DE USO ---
     try:

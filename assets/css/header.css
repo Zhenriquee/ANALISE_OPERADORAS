@@ -1,0 +1,41 @@
+/* --- assets/css/header.css --- */
+
+.sidebar-header-container {
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+.sidebar-title {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    /* Mudança: Cor principal Branca para fundo escuro */
+    color: #FFFFFF; 
+    margin: 0;
+    line-height: 1.2;
+}
+
+.sidebar-title span {
+    /* Mudança: Azul mais claro/brilhante para "acender" no fundo escuro */
+    color: #4DA6FF; 
+}
+
+.sidebar-divider {
+    height: 4px;
+    width: 50px;
+    /* Gradiente ajustado: Azul Brilhante para Branco */
+    background: linear-gradient(90deg, #4DA6FF, #FFFFFF);
+    margin: 12px auto;
+    border-radius: 2px;
+}
+
+.sidebar-subtitle {
+    font-size: 10px;
+    /* Mudança: Cinza claro para leitura */
+    color: #DDDDDD; 
+    margin: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+}

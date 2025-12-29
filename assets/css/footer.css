@@ -1,0 +1,45 @@
+/* --- assets/css/footer.css --- */
+
+.sidebar-footer-container {
+    text-align: center;
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+
+.sidebar-footer-text {
+    font-size: 14px;
+    /* Texto claro para fundo escuro */
+    color: #CCCCCC; 
+    margin-bottom: 15px;
+}
+
+/* Botão do LinkedIn */
+.linkedin-button {
+    background-color: #0077b5; /* Azul oficial do LinkedIn */
+    color: white !important;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px; /* Bordas um pouco mais arredondadas */
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.linkedin-button:hover {
+    background-color: #005E93; /* Tom mais escuro no hover */
+    transform: translateY(-2px); /* Efeito de elevação leve */
+    text-decoration: none;
+}
+
+.linkedin-icon {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1); /* Ícone branco */
+}

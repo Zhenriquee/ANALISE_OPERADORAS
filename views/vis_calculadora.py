@@ -6,6 +6,7 @@ from views.components.calculator.tab_power_score import render_tab_power_score
 from views.components.calculator.tab_spread import render_tab_spread
 from views.components.calculator.tab_grupo import render_tab_grupo
 
+
 def render_calculadora_didatica(df_mestre):
     st.header("🧮 Memória de Cálculo")
     st.caption("Auditoria detalhada baseada na regra de negócio oficial.")

@@ -10,10 +10,14 @@ from backend.exceptions import AppError
 # Imports Componentes
 from views.components.tables import formatar_moeda_br
 from views.components.glossary import render_glossary
+from views.components.footer import render_sidebar_footer
+from views.components.sidebar_header import render_sidebar_header
 
 def render_comparativo(df_mestre):
     # --- 1. CONTROLLER (Sidebar) ---
     with st.sidebar:
+        render_sidebar_header()
+        st.divider()
         st.header("Configuração do Comparativo")
         
         try:
@@ -55,6 +59,7 @@ def render_comparativo(df_mestre):
         
         st.markdown("---")
         render_glossary()
+        render_sidebar_footer()
 
     # --- 2. EXECUÇÃO DO CASO DE USO ---
     try:
