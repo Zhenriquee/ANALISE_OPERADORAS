@@ -6,18 +6,16 @@ ARQUIVO_LISTA_UNIMED = 'rede_unimed.txt'
 
 def _inicializar_lista_unimed():
     """
-    Função interna que lê o arquivo .txt e retorna um conjunto (set) de registros ANS.
-    É executada automaticamente ao importar este arquivo.
+    Lê arquivo e normaliza TUDO para 6 dígitos (ex: 5711 -> 005711).
     """
     lista_registros = set()
     
     if os.path.exists(ARQUIVO_LISTA_UNIMED):
         try:
             with open(ARQUIVO_LISTA_UNIMED, 'r', encoding='utf-8') as f:
-                # AJUSTE AQUI: .replace(',', '') e .replace('.', '')
-                # Isso garante que "339679," vire apenas "339679"
+                # AJUSTE: .zfill(6) garante que a lista de referência tenha o padrão correto
                 lista_registros = {
-                    linha.strip().replace(',', '').replace('.', '') 
+                    linha.strip().replace(',', '').replace('.', '').zfill(6)
                     for linha in f 
                     if linha.strip()
                 }
@@ -38,9 +36,9 @@ def extrair_marca(razao_social, registro_ans):
     """
     Normaliza a Marca/Grupo Econômico.
     """
-    # 1. Validação Prioritária: Registro ANS na Lista Carregada
-    # Converte para string e remove zeros à esquerda se houver divergência de formato
-    ans_str = str(registro_ans).strip()
+    # 1. Validação Prioritária: Registro ANS
+    # AJUSTE: Normaliza a entrada também para 6 dígitos para garantir o "match"
+    ans_str = str(registro_ans).split('.')[0].strip().zfill(6)
     
     if ans_str in _CACHE_REDE_UNIMED:
         return "UNIMED"
@@ -53,7 +51,7 @@ def extrair_marca(razao_social, registro_ans):
     # 2. Validação Secundária: Prefixo do Nome
     if nome.startswith("UNIMED"): return "UNIMED"
     
-    # 3. Demais Grupos (Regras Padrão)
+    # 3. Demais Grupos
     if nome.startswith("BRADESCO"): return "BRADESCO"
     if nome.startswith("AMIL"): return "AMIL"
     if nome.startswith("SUL AMERICA") or nome.startswith("SULAMERICA"): return "SULAMERICA"
@@ -62,7 +60,7 @@ def extrair_marca(razao_social, registro_ans):
     if nome.startswith("GOLDEN CROSS"): return "GOLDEN CROSS"
     if nome.startswith("PORTO SEGURO"): return "PORTO SEGURO"
     
-    # Regra Geral: Primeira palavra
+    # Regra Geral
     primeira_palavra = nome.split()[0].replace("-", "")
     return primeira_palavra
 

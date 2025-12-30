@@ -58,8 +58,9 @@ def render_analise_receita(df_mestre):
         
         # Grupo
         df_base['Marca_Temp'] = df_base.apply(
-        lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
-        axis=1)
+            lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+            axis=1
+        )
         opts_grupo = ["Todos"] + sorted(df_base['Marca_Temp'].unique())
         sel_grupo = st.selectbox("2️⃣ Grupo:", opts_grupo)
         if sel_grupo != "Todos": df_base = df_base[df_base['Marca_Temp'] == sel_grupo]
@@ -141,8 +142,9 @@ def render_analise_receita(df_mestre):
     df_graficos = content['df_full'].copy()
     if 'Marca_Temp' not in df_graficos.columns:
         df_graficos['Marca_Temp'] = df_graficos.apply(
-        lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
-        axis=1)
+            lambda row: extrair_marca(row['razao_social'], row['ID_OPERADORA']), 
+            axis=1
+        )
         
     c1, c2 = st.columns(2)
     c1.plotly_chart(render_spread_chart(df_graficos, info['id_op'], info['dados_op']['razao_social'], "Receita", "Mercado"), width="stretch")
@@ -155,10 +157,6 @@ def render_analise_receita(df_mestre):
     st.divider()
     
     # Tabelas
-    c1, c2 = st.columns(2)
-    c1.metric("Participação no Grupo (Share)", f"{metrics['insights']['Share_of_Brand']:.2f}%")
-    c2.metric("Média Cresc. Receita (Grupo)", f"{metrics['insights']['Media_Cresc_Receita_Grupo']:.2%}")
-    
     render_ranking_table(
         content['tabela_grupo'], 
         titulo=f"4. Ranking Financeiro Grupo: {info['marca']}",

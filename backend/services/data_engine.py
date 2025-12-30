@@ -38,10 +38,22 @@ class DataEngine:
 
         if df_dim.empty: return pd.DataFrame()
 
-        # --- PREPARAÇÃO DE TIPOS ---
-        df_dim['registro_operadora'] = df_dim['registro_operadora'].astype(str).str.strip()
-        df_ben['CD_OPERADO'] = df_ben['CD_OPERADO'].astype(str).str.strip()
-        df_fin['REG_ANS'] = df_fin['REG_ANS'].astype(str).str.strip()
+        # --- PREPARAÇÃO DE TIPOS E NORMALIZAÇÃO (NOVO) ---
+        # Função para garantir formato "005711" (6 dígitos)
+        # 1. Converte pra string
+        # 2. Split('.')[0] remove decimais caso venha como float (ex: "5711.0" -> "5711")
+        # 3. zfill(6) preenche com zeros à esquerda
+        def normalizar_ans(valor):
+            return str(valor).split('.')[0].strip().zfill(6)
+
+        if not df_dim.empty:
+            df_dim['registro_operadora'] = df_dim['registro_operadora'].apply(normalizar_ans)
+            
+        if not df_ben.empty:
+            df_ben['CD_OPERADO'] = df_ben['CD_OPERADO'].apply(normalizar_ans)
+            
+        if not df_fin.empty:
+            df_fin['REG_ANS'] = df_fin['REG_ANS'].apply(normalizar_ans)
 
         # --- FILTRO TEMPORAL (>= 2012-T1) ---
         DATA_CORTE = '2012-T1'
@@ -53,6 +65,7 @@ class DataEngine:
             df_fin = df_fin[df_fin['ID_TRIMESTRE'] >= DATA_CORTE]
 
         # --- JOIN 1: Beneficiários + Financeiro (FULL OUTER JOIN) ---
+        # Agora o join funcionará pois ambas as chaves estão normalizadas (005711 == 005711)
         df_mestre = pd.merge(
             df_ben,
             df_fin,
@@ -77,7 +90,7 @@ class DataEngine:
             how='left'
         )
 
-        # Seleção de colunas finais (Adicionado Data_Registro_ANS que estava faltando no seu arquivo anterior)
+        # Seleção de colunas finais
         cols_desejadas = [
             'ID_TRIMESTRE', 'ID_OPERADORA', 'razao_social', 'cnpj', 'uf', 'modalidade',
             'cidade', 'representante', 'cargo_representante', 'Data_Registro_ANS',
@@ -88,18 +101,13 @@ class DataEngine:
         cols_existentes = [c for c in cols_desejadas if c in df_final.columns]
         df_final = df_final[cols_existentes]
 
-        # Ordenação Obrigatória (Necessária para o pct_change funcionar corretamente)
+        # Ordenação Obrigatória
         df_final = df_final.sort_values(['ID_OPERADORA', 'ID_TRIMESTRE'])
 
-        # --- CÁLCULOS QUE ESTAVAM FALTANDO (CORREÇÃO DO ERRO) ---
-        
-        # 1. Variação de Vidas (Trimestre atual vs Anterior)
+        # --- CÁLCULOS ---
         df_final['VAR_PCT_VIDAS'] = df_final.groupby('ID_OPERADORA')['NR_BENEF_T'].pct_change().fillna(0)
-        
-        # 2. Variação de Receita
         df_final['VAR_PCT_RECEITA'] = df_final.groupby('ID_OPERADORA')['VL_SALDO_FINAL'].pct_change().fillna(0)
 
-        # KPI Custo (Otimizado com numpy)
         df_final['CUSTO_POR_VIDA'] = np.where(
             df_final['NR_BENEF_T'] > 0, 
             df_final['VL_SALDO_FINAL'] / df_final['NR_BENEF_T'], 
