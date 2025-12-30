@@ -14,7 +14,8 @@ class DataEngine:
         sql_dim = """
             SELECT 
                 registro_operadora, cnpj, razao_social, uf, modalidade,
-                cidade, representante, cargo_representante, Data_Registro_ANS
+                cidade, representante, cargo_representante, Data_Registro_ANS,
+                descredenciada_em, descredenciamento_motivo
             FROM dim_operadoras
         """
         df_dim = self.connector.executar_query(sql_dim)
@@ -80,6 +81,7 @@ class DataEngine:
         cols_desejadas = [
             'ID_TRIMESTRE', 'ID_OPERADORA', 'razao_social', 'cnpj', 'uf', 'modalidade',
             'cidade', 'representante', 'cargo_representante', 'Data_Registro_ANS',
+            'descredenciada_em', 'descredenciamento_motivo',
             'NR_BENEF_T', 'VL_SALDO_FINAL'
         ]
         
