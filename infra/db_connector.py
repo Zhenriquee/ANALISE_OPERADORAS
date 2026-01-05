@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 import os
 import logging
-from backend.infra.contract import IDatabaseConnector
+from infra.contract import IDatabaseConnector
 from configuracoes import DATABASE_PATH
 
 # Configuração básica de log para observabilidade
