@@ -46,7 +46,9 @@ class MarketOverviewUseCase:
             
             top_1 = df_ranqueado.iloc[0]
             id_top_1 = str(top_1['ID_OPERADORA'])
-
+            # Tratamento seguro para Cidade/UF
+            cidade = str(top_1.get('cidade') or 'Desconhecida').title()
+            uf = str(top_1.get('uf') or '')
             # 6. Preparação dos KPIs do Líder (Objeto DTO simples)
             kpis_lider = {
                 'Vidas': top_1['NR_BENEF_T'],
@@ -54,7 +56,7 @@ class MarketOverviewUseCase:
                 'Ticket': top_1['VL_SALDO_FINAL'] / top_1['NR_BENEF_T'] if top_1['NR_BENEF_T'] > 0 else 0,
                 'Var_Vidas_QoQ': top_1['VAR_PCT_VIDAS'],
                 'Var_Receita_QoQ': top_1['VAR_PCT_RECEITA'],
-                'Sede': f"{str(top_1.get('cidade','')).title()}/{str(top_1.get('uf',''))}"
+                'Sede': f"{cidade}/{uf}".strip("/")
             }
 
             # 7. Retorno Estruturado (DTO)

@@ -4,14 +4,42 @@ def formatar_moeda_kpi(valor):
     return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 def render_kpi_row(kpis, rank_grupo_info=None):
+    """
+    Renderiza uma linha de 4 KPIs.
+    O 4º KPI é dinâmico: pode ser Ranking (Tupla) ou Sede (String).
+    """
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("👥 Vidas", f"{int(kpis['Vidas']):,}".replace(",", "."), delta=f"{kpis.get('Var_Vidas_QoQ', 0):.1%} (QoQ)".replace(".", ","), delta_color="normal")
-    k2.metric("💰 Receita", formatar_moeda_kpi(kpis['Receita']), delta=f"{kpis.get('Var_Receita_QoQ', 0):.1%} (QoQ)".replace(".", ","), delta_color="normal")
+    
+    # KPI 1: Vidas
+    k1.metric(
+        "👥 Vidas", 
+        f"{int(kpis['Vidas']):,}".replace(",", "."), 
+        delta=f"{kpis.get('Var_Vidas_QoQ', 0):.1%} (QoQ)".replace(".", ","), 
+        delta_color="normal"
+    )
+    
+    # KPI 2: Receita
+    k2.metric(
+        "💰 Receita", 
+        formatar_moeda_kpi(kpis['Receita']), 
+        delta=f"{kpis.get('Var_Receita_QoQ', 0):.1%} (QoQ)".replace(".", ","), 
+        delta_color="normal"
+    )
+    
+    # KPI 3: Ticket Médio
     k3.metric("📊 Ticket Médio", formatar_moeda_kpi(kpis['Ticket']))
     
-    if rank_grupo_info and isinstance(rank_grupo_info, tuple):
-        rank, total, nome_grupo = rank_grupo_info
-        k4.metric(f"🏢 Rank {nome_grupo}", f"#{rank}", f"de {total} ops", delta_color="off")
+    # KPI 4: Dinâmico (Sede ou Ranking) [CORREÇÃO AQUI]
+    if rank_grupo_info:
+        if isinstance(rank_grupo_info, tuple):
+            # Caso 1: Exibe Ranking (rank, total, nome_grupo)
+            rank, total, nome_grupo = rank_grupo_info
+            k4.metric(f"🏢 Rank {nome_grupo}", f"#{rank}", f"de {total} ops", delta_color="off")
+        elif isinstance(rank_grupo_info, str):
+            # Caso 2: Exibe Sede (passada como string "Cidade/UF")
+            k4.metric("📍 Sede", rank_grupo_info)
+        else:
+            k4.metric("📍 Info", str(rank_grupo_info))
     else:
         k4.metric("📍 Info", "-")
 
