@@ -3,3 +3,4 @@ SELECT
     ID_TRIMESTRE, 
     VL_SALDO_FINAL 
 FROM demonstracoes_contabeis
+WHERE ID_TRIMESTRE >= ?

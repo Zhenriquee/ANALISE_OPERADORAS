@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from backend.constants import Colunas
 
 class DataProcessor:
     """
@@ -42,21 +43,18 @@ class DataProcessor:
 
     @staticmethod
     def calcular_kpis(df: pd.DataFrame) -> pd.DataFrame:
-        """Calcula métricas derivadas (Gold Layer)."""
-        if df.empty:
-            return df
+        if df.empty: return df
             
-        # Ordenação necessária para cálculos de variação (pct_change)
-        df = df.sort_values(['ID_OPERADORA', 'ID_TRIMESTRE'])
+        df = df.sort_values([Colunas.ID_OPERADORA, Colunas.TRIMESTRE])
         
         # Variações
-        df['VAR_PCT_VIDAS'] = df.groupby('ID_OPERADORA')['NR_BENEF_T'].pct_change().fillna(0)
-        df['VAR_PCT_RECEITA'] = df.groupby('ID_OPERADORA')['VL_SALDO_FINAL'].pct_change().fillna(0)
+        df[Colunas.VAR_VIDAS] = df.groupby(Colunas.ID_OPERADORA)[Colunas.VIDAS].pct_change().fillna(0)
+        df[Colunas.VAR_RECEITA] = df.groupby(Colunas.ID_OPERADORA)[Colunas.RECEITA].pct_change().fillna(0)
 
-        # KPIs Compostos
-        df['CUSTO_POR_VIDA'] = np.where(
-            df['NR_BENEF_T'] > 0, 
-            df['VL_SALDO_FINAL'] / df['NR_BENEF_T'], 
+        # KPI Composto
+        df[Colunas.CUSTO_VIDA] = np.where(
+            df[Colunas.VIDAS] > 0, 
+            df[Colunas.RECEITA] / df[Colunas.VIDAS], 
             0
         )
         return df

@@ -2,7 +2,6 @@ import sqlite3
 import pandas as pd
 import logging
 from typing import Optional
-from configuracoes import DATABASE_PATH
 
 # Configuração de Log
 logging.basicConfig(level=logging.INFO)
@@ -11,12 +10,17 @@ logger = logging.getLogger(__name__)
 class ConexaoSQLite:
     """
     Gerenciador de Conexão SQLite.
-    Refatorado para suportar integração nativa com Pandas (read_sql).
+    Princípio: Ignorância de Configuração.
+    Esta classe não importa 'settings' ou 'config'. Ela apenas recebe o caminho no __init__.
     """
     
-    def __init__(self, db_name: str = DATABASE_PATH):
-        # Ajuste o caminho do banco conforme sua estrutura real (data/ ou raiz)
-        self.db_name = db_name
+    def __init__(self, db_path: str):
+        """
+        Args:
+            db_path (str): Caminho absoluto ou relativo para o arquivo .db.
+                           Obrigatório passar explicitamente.
+        """
+        self.db_name = db_path
         self.connection: Optional[sqlite3.Connection] = None
 
     def __enter__(self):
@@ -24,7 +28,7 @@ class ConexaoSQLite:
         self._conectar()
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         """Context Manager: Fecha conexão ao sair"""
         self._desconectar()
 
@@ -33,9 +37,8 @@ class ConexaoSQLite:
         if not self.connection:
             try:
                 self.connection = sqlite3.connect(self.db_name)
-                # logger.info(f"Conectado ao banco: {self.db_name}")
             except sqlite3.Error as e:
-                logger.error(f"Erro de conexão SQLite: {e}")
+                logger.error(f"Erro de conexão SQLite no caminho '{self.db_name}': {e}")
                 raise
 
     def _desconectar(self):
@@ -44,32 +47,20 @@ class ConexaoSQLite:
             self.connection.close()
             self.connection = None
 
-    def executar_query(self, query: str, parametros: dict = None) -> pd.DataFrame:
+    def executar_query(self, query: str, parametros: tuple = None) -> pd.DataFrame:
         """
         Executa uma query SQL e retorna diretamente um Pandas DataFrame.
-        Trata automaticamente a abertura/fechamento de conexão se não estiver em bloco 'with'.
         """
-        # Garante que temos uma conexão ativa
         self._conectar()
         
         try:
-            # Pandas read_sql é mais robusto para ETL que cursor.fetchall()
-            # params=parametros trata SQL Injection automaticamente
-            df = pd.read_sql(query, self.connection, params=parametros)
-            return df
+            # Pandas read_sql já trata a conversão e nomes de colunas
+            return pd.read_sql(query, self.connection, params=parametros)
             
         except Exception as e:
             logger.error(f"Erro ao executar query: {e}")
-            logger.debug(f"Query falha: {query}")
-            return pd.DataFrame() # Retorna vazio em caso de erro para não quebrar a UI
+            return pd.DataFrame() # Fail Gracefully
             
-        finally:
-            # Se não estivermos usando Context Manager (__enter__), 
-            # é boa prática fechar conexões transientes, mas em Data Apps 
-            # às vezes mantemos aberta. Aqui, vamos manter aberta se foi instanciada
-            # pelo __init__, mas o garbage collector do Python cuidará do resto.
-            pass
-
     def executar_comando(self, sql: str, parametros: tuple = None) -> None:
         """
         Para comandos que NÃO retornam dados (INSERT, UPDATE, DELETE, CREATE).

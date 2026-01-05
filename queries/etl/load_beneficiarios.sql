@@ -3,3 +3,4 @@ SELECT
     ID_TRIMESTRE, 
     NR_BENEF_T 
 FROM beneficiarios_agrupados
+WHERE ID_TRIMESTRE >= ?
