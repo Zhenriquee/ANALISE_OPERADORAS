@@ -3,6 +3,10 @@ from infra.db_connector import ConexaoSQLite
 from backend.repository import AnsRepository
 from backend.config import settings
 from backend.processing.processor import DataProcessor
+from backend.logger import get_logger
+from backend.contracts import SchemaMestre
+
+logger = get_logger(__name__)
 
 class DataEngine:
     def __init__(self):
@@ -18,12 +22,12 @@ class DataEngine:
 
     def _extrair_dados(self):
         """Etapa de Extração (Bronze Layer)"""
-        print("Extraindo dados brutos...")
-        return (
-            self.repository.buscar_dados_brutos("etl/load_dim_operadoras.sql"),
-            self.repository.buscar_dados_brutos("etl/load_beneficiarios.sql"),
-            self.repository.buscar_dados_brutos("etl/load_financeiro.sql")
-        )
+        logger.info("Iniciando pipeline de extração de dados...") 
+        dim_operadora = self.repository.buscar_dados_brutos("etl/load_dim_operadoras.sql")
+        fato_beneficiarios = self.repository.buscar_dados_brutos("etl/load_beneficiarios.sql")
+        fato_financeiro = self.repository.buscar_dados_brutos("etl/load_financeiro.sql")
+        logger.info("Extração concluída com sucesso.")   
+        return dim_operadora, fato_beneficiarios, fato_financeiro
 
     def gerar_dataset_mestre(self):
         """
@@ -32,6 +36,7 @@ class DataEngine:
         2. Transformação Silver (Normalização/Limpeza)
         3. Transformação Gold (Enriquecimento/KPIs)
         """
+        logger.info("Iniciando processamento (Silver/Gold layers)...")
         # 1. Extração
         df_dim, df_ben, df_fin = self._extrair_dados()
         
@@ -75,5 +80,10 @@ class DataEngine:
             'VAR_PCT_VIDAS', 'VAR_PCT_RECEITA', 'CUSTO_POR_VIDA'
         ]
         cols_existentes = [c for c in cols_desejadas if c in df_final.columns]
-        
+        try:
+            logger.info("Validando contrato de dados (Schema)...")
+            SchemaMestre.validate(df_final[cols_existentes], lazy=True)
+            logger.info("Dados validados com sucesso via Pandera.")
+        except Exception as e:
+            logger.error(f"Violação de Contrato de Dados: {e}")
         return df_final[cols_existentes]
